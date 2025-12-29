@@ -1,3 +1,7 @@
+<div align="center">
+  <img src="https://i.ibb.co/rKB6Smh0/logo.jpg" alt="Tilded Logo" width="600"/>
+</div>
+
 # Tilded
 
 Una aplicación moderna de gestión de tareas desarrollada con React y Fastify. Sistema completo para organizar tareas, proyectos, etiquetas y más, con soporte multiidioma y avatares personalizados.
