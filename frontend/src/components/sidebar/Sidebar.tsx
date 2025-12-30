@@ -38,6 +38,8 @@ interface SidebarProps {
   onAddTaskClick: () => void;
   isCollapsed?: boolean;
   onToggleCollapse?: () => void;
+  isMobileOpen?: boolean;
+  onMobileClose?: () => void;
 }
 
 export const Sidebar = ({
@@ -47,7 +49,9 @@ export const Sidebar = ({
   onProjectSelect,
   onAddTaskClick,
   isCollapsed = false,
-  onToggleCollapse
+  onToggleCollapse,
+  isMobileOpen = false,
+  onMobileClose
 }: SidebarProps) => {
   const { t } = useTranslation();
   const { categories, fetchCategories } = useCategoryStore();
@@ -77,9 +81,39 @@ export const Sidebar = ({
     fetchProjects();
   };
 
+  const handleProjectClick = (projectId: string) => {
+    onProjectSelect(projectId);
+    // Cerrar sidebar en móvil al seleccionar un proyecto
+    if (onMobileClose && window.innerWidth < 1024) {
+      onMobileClose();
+    }
+  };
+
+  const handleViewClick = (view: ViewType) => {
+    onViewChange(view);
+    // Cerrar sidebar en móvil al cambiar de vista
+    if (onMobileClose && window.innerWidth < 1024) {
+      onMobileClose();
+    }
+  };
+
   return (
-    <div className="relative flex h-screen">
-      <aside className={`${isCollapsed ? 'w-20' : 'w-64'} bg-bg-dark text-txt-light flex flex-col h-screen transition-all duration-300 overflow-hidden border-r border-silver/10`}>
+    <>
+      {/* Overlay para móvil */}
+      {isMobileOpen && (
+        <div
+          className="fixed inset-0 bg-black/50 z-[9998] lg:hidden"
+          onClick={onMobileClose}
+        />
+      )}
+      
+      <aside className={`
+        fixed lg:relative
+        ${isMobileOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
+        ${isCollapsed ? 'w-20' : 'w-64'} 
+        bg-bg-dark text-txt-light flex flex-col h-screen transition-all duration-300 overflow-hidden border-r border-silver/10 z-[9999]
+        safe-area-inset-left
+      `}>
       {/* Header con toggle */}
       <div className="p-3 border-b border-silver/10 flex items-center justify-between">
         {!isCollapsed && (
@@ -130,8 +164,13 @@ export const Sidebar = ({
       {/* Botón Add Task */}
       <div className="p-2 border-b border-silver/10">
         <button
-          onClick={onAddTaskClick}
-          className={`w-full bg-primary hover:bg-primary-hover text-txt-light font-medium py-2 px-3 rounded-lg flex items-center justify-center gap-2 transition-colors ${isCollapsed ? 'px-2' : ''}`}
+          onClick={() => {
+            onAddTaskClick();
+            if (onMobileClose && window.innerWidth < 1024) {
+              onMobileClose();
+            }
+          }}
+          className={`w-full bg-primary hover:bg-primary-hover active:bg-primary-hover text-txt-light font-medium py-2.5 sm:py-2 px-3 rounded-lg flex items-center justify-center gap-2 transition-colors touch-manipulation ${isCollapsed ? 'px-2' : ''}`}
           title={isCollapsed ? t('sidebar.addTask') : undefined}
         >
           <PlusIcon className="w-5 h-5 flex-shrink-0" />
@@ -143,11 +182,11 @@ export const Sidebar = ({
       <div className="p-2 border-b border-silver/10">
         <nav className="space-y-1">
           <button
-            onClick={() => onViewChange('inbox')}
-            className={`w-full flex items-center ${isCollapsed ? 'justify-center' : 'gap-3'} px-3 py-2 rounded-lg transition-colors text-sm ${
+            onClick={() => handleViewClick('inbox')}
+            className={`w-full flex items-center ${isCollapsed ? 'justify-center' : 'gap-3'} px-3 py-2.5 sm:py-2 rounded-lg transition-colors text-sm touch-manipulation ${
               selectedView === 'inbox'
                 ? 'bg-primary/20 text-primary'
-                : 'text-txt-muted hover:bg-silver/10 hover:text-txt-light'
+                : 'text-txt-muted hover:bg-silver/10 hover:text-txt-light active:bg-silver/20'
             }`}
             title={isCollapsed ? t('sidebar.inbox') : undefined}
           >
@@ -156,11 +195,11 @@ export const Sidebar = ({
           </button>
 
           <button
-            onClick={() => onViewChange('today')}
-            className={`w-full flex items-center ${isCollapsed ? 'justify-center' : 'gap-3'} px-3 py-2 rounded-lg transition-colors text-sm ${
+            onClick={() => handleViewClick('today')}
+            className={`w-full flex items-center ${isCollapsed ? 'justify-center' : 'gap-3'} px-3 py-2.5 sm:py-2 rounded-lg transition-colors text-sm touch-manipulation ${
               selectedView === 'today'
                 ? 'bg-primary/20 text-primary'
-                : 'text-txt-muted hover:bg-silver/10 hover:text-txt-light'
+                : 'text-txt-muted hover:bg-silver/10 hover:text-txt-light active:bg-silver/20'
             }`}
             title={isCollapsed ? t('sidebar.today') : undefined}
           >
@@ -169,11 +208,11 @@ export const Sidebar = ({
           </button>
 
           <button
-            onClick={() => onViewChange('upcoming')}
-            className={`w-full flex items-center ${isCollapsed ? 'justify-center' : 'gap-3'} px-3 py-2 rounded-lg transition-colors text-sm ${
+            onClick={() => handleViewClick('upcoming')}
+            className={`w-full flex items-center ${isCollapsed ? 'justify-center' : 'gap-3'} px-3 py-2.5 sm:py-2 rounded-lg transition-colors text-sm touch-manipulation ${
               selectedView === 'upcoming'
                 ? 'bg-primary/20 text-primary'
-                : 'text-txt-muted hover:bg-silver/10 hover:text-txt-light'
+                : 'text-txt-muted hover:bg-silver/10 hover:text-txt-light active:bg-silver/20'
             }`}
             title={isCollapsed ? t('sidebar.upcoming') : undefined}
           >
@@ -201,13 +240,11 @@ export const Sidebar = ({
                       className="group flex items-center gap-1"
                     >
                       <button
-                        onClick={() => {
-                          onProjectSelect(project.id);
-                        }}
-                        className={`flex-1 flex items-center gap-2 px-3 py-2 rounded-lg transition-colors text-sm text-left ${
+                        onClick={() => handleProjectClick(project.id)}
+                        className={`flex-1 flex items-center gap-2 px-3 py-2.5 sm:py-2 rounded-lg transition-colors text-sm text-left touch-manipulation ${
                           selectedProjectId === project.id && selectedView === null
                             ? 'bg-primary/20 text-primary'
-                            : 'text-txt-muted hover:bg-silver/10 hover:text-txt-light'
+                            : 'text-txt-muted hover:bg-silver/10 hover:text-txt-light active:bg-silver/20'
                         }`}
                       >
                         <HashtagIcon className="w-4 h-4 text-primary flex-shrink-0" />
@@ -240,13 +277,11 @@ export const Sidebar = ({
             {favoriteProjects.map(project => (
               <button
                 key={project.id}
-                onClick={() => {
-                  onProjectSelect(project.id);
-                }}
-                className={`w-full flex items-center justify-center p-2 rounded-lg transition-colors ${
+                onClick={() => handleProjectClick(project.id)}
+                className={`w-full flex items-center justify-center p-2.5 sm:p-2 rounded-lg transition-colors touch-manipulation ${
                   selectedProjectId === project.id && selectedView === null
                     ? 'bg-primary/20 text-primary'
-                    : 'text-txt-muted hover:bg-silver/10 hover:text-txt-light'
+                    : 'text-txt-muted hover:bg-silver/10 hover:text-txt-light active:bg-silver/20'
                 }`}
                 title={project.name}
               >
@@ -281,13 +316,11 @@ export const Sidebar = ({
             {projects.slice(0, 5).map(project => (
               <button
                 key={project.id}
-                onClick={() => {
-                  onProjectSelect(project.id);
-                }}
-                className={`w-full flex items-center justify-center p-2 rounded-lg transition-colors ${
+                onClick={() => handleProjectClick(project.id)}
+                className={`w-full flex items-center justify-center p-2.5 sm:p-2 rounded-lg transition-colors touch-manipulation ${
                   selectedProjectId === project.id
                     ? 'bg-primary/20 text-primary'
-                    : 'text-txt-muted hover:bg-silver/10 hover:text-txt-light'
+                    : 'text-txt-muted hover:bg-silver/10 hover:text-txt-light active:bg-silver/20'
                 }`}
                 title={project.name}
               >
@@ -311,7 +344,7 @@ export const Sidebar = ({
         </button>
       </div>
       </aside>
-    </div>
+    </>
   );
 };
 

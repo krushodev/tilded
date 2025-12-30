@@ -4,7 +4,7 @@ import type { Task } from '@/types';
 import { useCategoryStore } from '@/store/category.store';
 import { useProjectStore } from '@/store/project.store';
 import { useSectionStore } from '@/store/section.store';
-import { PlusIcon, EyeIcon, EyeSlashIcon, Squares2X2Icon, ListBulletIcon } from '@heroicons/react/24/outline';
+import { PlusIcon, EyeIcon, EyeSlashIcon, Squares2X2Icon, ListBulletIcon, Bars3Icon } from '@heroicons/react/24/outline';
 import { Sidebar } from '@/components/sidebar/Sidebar';
 import { TaskItem } from '@/components/tasks/TaskItem';
 import { TaskFormModal } from '@/components/tasks/TaskFormModal';
@@ -38,6 +38,7 @@ export default function Dashboard() {
   const [showCompleted, setShowCompleted] = useState(false);
   const [showAddSection, setShowAddSection] = useState(false);
   const [newSectionName, setNewSectionName] = useState('');
+  const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
 
   useEffect(() => {
     fetchCategories();
@@ -186,7 +187,7 @@ export default function Dashboard() {
             onChange={e => setProjectNameValue(e.target.value)}
             onBlur={handleProjectNameSubmit}
             onKeyDown={handleProjectNameKeyDown}
-            className="bg-transparent border-b-2 border-primary focus:outline-none text-3xl font-semibold text-txt w-full"
+            className="bg-transparent border-b-2 border-primary focus:outline-none text-xl sm:text-2xl md:text-3xl font-semibold text-txt w-full"
             autoFocus
           />
         );
@@ -204,19 +205,19 @@ export default function Dashboard() {
             setProjectNameValue(selectedProject.name);
           }}
           readOnly
-          className="bg-transparent border-b-2 border-transparent hover:border-primary/30 focus:border-primary focus:outline-none text-3xl font-semibold text-txt cursor-text transition-colors w-full"
+          className="bg-transparent border-b-2 border-transparent hover:border-primary/30 focus:border-primary focus:outline-none text-xl sm:text-2xl md:text-3xl font-semibold text-txt cursor-text transition-colors w-full"
         />
       );
     }
     // Si no hay proyecto, mostrar la vista seleccionada (no editable)
-    if (selectedView === 'today') return <span className="text-3xl font-semibold text-txt">{t('sidebar.today')}</span>;
-    if (selectedView === 'inbox') return <span className="text-3xl font-semibold text-txt">{t('sidebar.inbox')}</span>;
-    if (selectedView === 'upcoming') return <span className="text-3xl font-semibold text-txt">{t('sidebar.upcoming')}</span>;
+    if (selectedView === 'today') return <span className="text-xl sm:text-2xl md:text-3xl font-semibold text-txt">{t('sidebar.today')}</span>;
+    if (selectedView === 'inbox') return <span className="text-xl sm:text-2xl md:text-3xl font-semibold text-txt">{t('sidebar.inbox')}</span>;
+    if (selectedView === 'upcoming') return <span className="text-xl sm:text-2xl md:text-3xl font-semibold text-txt">{t('sidebar.upcoming')}</span>;
     return null; // No mostrar nada si no hay vista ni proyecto
   };
 
   return (
-    <div className="flex h-screen bg-bg-secondary">
+    <div className="flex h-screen bg-bg-secondary overflow-hidden">
       <Sidebar
         selectedView={selectedView}
         selectedProjectId={selectedProjectId}
@@ -225,10 +226,35 @@ export default function Dashboard() {
         onAddTaskClick={handleAddTaskClick}
         isCollapsed={sidebarCollapsed}
         onToggleCollapse={() => setSidebarCollapsed(!sidebarCollapsed)}
+        isMobileOpen={isMobileSidebarOpen}
+        onMobileClose={() => setIsMobileSidebarOpen(false)}
       />
 
-      <main className="flex-1 overflow-y-auto bg-bg">
-        <div className="max-w-6xl mx-auto px-8 py-12">
+      <main className="flex-1 overflow-y-auto bg-bg safe-area-inset-top safe-area-inset-bottom">
+        {/* Mobile Header */}
+        <div className="lg:hidden sticky top-0 z-50 bg-bg border-b border-silver/10 px-4 py-3 flex items-center justify-between safe-area-inset-top">
+          <button
+            onClick={() => setIsMobileSidebarOpen(true)}
+            className="p-2 -ml-2 rounded-lg hover:bg-bg-secondary transition-colors touch-manipulation"
+            aria-label="Abrir menú"
+          >
+            <Bars3Icon className="w-6 h-6 text-txt" />
+          </button>
+          <h1 className="text-lg font-semibold text-txt truncate flex-1 text-center px-4">
+            {selectedProjectId && selectedProject
+              ? selectedProject.name
+              : selectedView === 'today'
+              ? t('sidebar.today')
+              : selectedView === 'inbox'
+              ? t('sidebar.inbox')
+              : selectedView === 'upcoming'
+              ? t('sidebar.upcoming')
+              : 'Tilded'}
+          </h1>
+          <div className="w-10" /> {/* Spacer para centrar el título */}
+        </div>
+
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 md:px-8 py-4 sm:py-6 md:py-8 lg:py-12">
           {selectedView === 'upcoming' ? (
             <UpcomingView
               tasks={tasks}
@@ -238,11 +264,13 @@ export default function Dashboard() {
           ) : (
             <>
               {(selectedProjectId || selectedView) && (
-                <div className="mb-8">
-                  <div className="flex items-center justify-between">
-                    {getViewTitle()}
+                <div className="mb-6 sm:mb-8">
+                  <div className="flex items-center justify-between gap-4">
+                    <div className="flex-1 min-w-0">
+                      {getViewTitle()}
+                    </div>
                     {selectedProjectId && sections.length > 0 && (
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-2 flex-shrink-0">
                         <button
                           onClick={() => setDisplayMode('list')}
                           className={`p-2 rounded-lg transition-colors ${
@@ -252,7 +280,7 @@ export default function Dashboard() {
                           }`}
                           title="Vista de lista"
                         >
-                          <ListBulletIcon className="w-5 h-5" />
+                          <ListBulletIcon className="w-4 h-4 sm:w-5 sm:h-5" />
                         </button>
                         <button
                           onClick={() => setDisplayMode('board')}
@@ -263,7 +291,7 @@ export default function Dashboard() {
                           }`}
                           title="Vista de tablero"
                         >
-                          <Squares2X2Icon className="w-5 h-5" />
+                          <Squares2X2Icon className="w-4 h-4 sm:w-5 sm:h-5" />
                         </button>
                       </div>
                     )}
@@ -340,8 +368,8 @@ export default function Dashboard() {
                   
                   {/* Tareas sin sección */}
                   {displayedTasks.filter(t => !t.sectionId).length > 0 && (
-                    <div className="mt-8 border-t border-silver/20 pt-6">
-                      <h3 className="text-base font-bold text-txt mb-3">{t('task.otherTasks')}</h3>
+                    <div className="mt-6 sm:mt-8 border-t border-silver/20 pt-4 sm:pt-6">
+                      <h3 className="text-sm sm:text-base font-bold text-txt mb-3">{t('task.otherTasks')}</h3>
                       <div className="space-y-1">
                         {displayedTasks.filter(t => !t.sectionId).map(task => (
                           <TaskItem
@@ -356,7 +384,7 @@ export default function Dashboard() {
                     </div>
                   )}
 
-                  <div className="mt-8 border-t border-silver/20 pt-6">
+                  <div className="mt-6 sm:mt-8 border-t border-silver/20 pt-4 sm:pt-6">
                     {showAddSection ? (
                       <div className="flex items-center gap-2 p-3 bg-bg-secondary rounded-lg">
                         <input
@@ -371,32 +399,32 @@ export default function Dashboard() {
                             }
                           }}
                           placeholder={t('project.sectionName')}
-                          className="flex-1 bg-transparent border-none focus:outline-none text-txt"
+                          className="flex-1 bg-transparent border-none focus:outline-none text-txt text-sm sm:text-base"
                           autoFocus
                         />
                         <button
                           onClick={handleAddSection}
-                          className="px-3 py-1.5 bg-primary text-white rounded-lg hover:bg-primary-hover transition-colors text-sm"
+                          className="px-2 sm:px-3 py-1.5 bg-primary text-white rounded-lg hover:bg-primary-hover transition-colors text-xs sm:text-sm whitespace-nowrap"
                         >
-                          Añadir
+                          {t('common.add')}
                         </button>
                         <button
                           onClick={() => {
                             setShowAddSection(false);
                             setNewSectionName('');
                           }}
-                          className="px-3 py-1.5 text-txt-muted hover:text-txt transition-colors text-sm"
+                          className="px-2 sm:px-3 py-1.5 text-txt-muted hover:text-txt transition-colors text-xs sm:text-sm whitespace-nowrap"
                         >
-                          Cancelar
+                          {t('common.cancel')}
                         </button>
                       </div>
                     ) : (
                       <button
                         onClick={() => setShowAddSection(true)}
-                        className="flex items-center gap-2 px-3 py-1.5 text-txt-muted hover:text-txt transition-colors text-sm rounded-md hover:bg-bg-secondary w-full"
+                        className="flex items-center gap-2 px-3 py-1.5 text-txt-muted hover:text-txt transition-colors text-xs sm:text-sm rounded-md hover:bg-bg-secondary w-full"
                       >
-                        <PlusIcon className="w-5 h-5" />
-                        <span>Añadir sección</span>
+                        <PlusIcon className="w-4 h-4 sm:w-5 sm:h-5" />
+                        <span>{t('project.addSection')}</span>
                       </button>
                     )}
                   </div>
@@ -405,31 +433,31 @@ export default function Dashboard() {
                 <>
                   {/* Proyecto sin secciones - mostrar tareas normales */}
                   <div className="space-y-1 mb-6">
-                    {displayedTasks.length === 0 && !showQuickInput ? (
-                      <div className="text-center py-12 text-txt-muted">
-                        <p className="text-sm">No hay tareas aún</p>
-                        <p className="text-xs mt-1">Agrega una tarea para comenzar</p>
-                      </div>
-                    ) : (
+                  {displayedTasks.length === 0 && !showQuickInput ? (
+                    <div className="text-center py-8 sm:py-12 text-txt-muted">
+                      <p className="text-sm sm:text-base">{t('task.noTasks')}</p>
+                      <p className="text-xs sm:text-sm mt-1">{t('task.addTaskToStart')}</p>
+                    </div>
+                  ) : (
                       <>
-                        {completedCount > 0 && (
-                          <button
-                            onClick={() => setShowCompleted(!showCompleted)}
-                            className="flex items-center gap-2 px-3 py-2 mb-4 text-txt-muted hover:text-txt transition-colors text-sm"
-                          >
-                            {showCompleted ? (
-                              <>
-                                <EyeSlashIcon className="w-4 h-4" />
-                                <span>Ocultar {completedCount} completada{completedCount !== 1 ? 's' : ''}</span>
-                              </>
-                            ) : (
-                              <>
-                                <EyeIcon className="w-4 h-4" />
-                                <span>Ver {completedCount} completada{completedCount !== 1 ? 's' : ''}</span>
-                              </>
-                            )}
-                          </button>
-                        )}
+                      {completedCount > 0 && (
+                        <button
+                          onClick={() => setShowCompleted(!showCompleted)}
+                          className="flex items-center gap-2 px-3 py-2 mb-4 text-txt-muted hover:text-txt transition-colors text-xs sm:text-sm"
+                        >
+                          {showCompleted ? (
+                            <>
+                              <EyeSlashIcon className="w-4 h-4" />
+                              <span>{t('task.hide')} {completedCount} {t('task.completed')}{completedCount !== 1 ? 's' : ''}</span>
+                            </>
+                          ) : (
+                            <>
+                              <EyeIcon className="w-4 h-4" />
+                              <span>{t('task.show')} {completedCount} {t('task.completed')}{completedCount !== 1 ? 's' : ''}</span>
+                            </>
+                          )}
+                        </button>
+                      )}
                         
                         {displayedTasks.map(task => (
                           <TaskItem
@@ -455,19 +483,19 @@ export default function Dashboard() {
                       </>
                     )}
 
-                    {!showQuickInput && (
-                      <button
-                        onClick={() => setShowQuickInput(true)}
-                        className="flex items-center gap-3 px-3 py-2 rounded-lg border border-silver/30 bg-bg hover:border-primary/30 transition-colors focus-within:border-primary/50 focus-within:ring-2 focus-within:ring-primary/10 w-full"
-                      >
-                        <PlusIcon className="w-5 h-5 text-txt-muted flex-shrink-0" />
-                        <span className="text-sm text-txt-muted">Añadir tarea...</span>
-                      </button>
-                    )}
+                  {!showQuickInput && (
+                    <button
+                      onClick={() => setShowQuickInput(true)}
+                      className="flex items-center gap-2 sm:gap-3 px-3 py-2 rounded-lg border border-silver/30 bg-bg hover:border-primary/30 transition-colors focus-within:border-primary/50 focus-within:ring-2 focus-within:ring-primary/10 w-full"
+                    >
+                      <PlusIcon className="w-4 h-4 sm:w-5 sm:h-5 text-txt-muted flex-shrink-0" />
+                      <span className="text-xs sm:text-sm text-txt-muted">{t('task.addTask')}...</span>
+                    </button>
+                  )}
                   </div>
 
                    {/* Opción para crear sección */}
-                   <div className="mt-8 pt-6 border-t border-silver/20">
+                   <div className="mt-6 sm:mt-8 pt-4 sm:pt-6 border-t border-silver/20">
                      {showAddSection ? (
                        <div className="flex items-center gap-2 p-3 bg-bg-secondary rounded-lg">
                          <input
@@ -482,12 +510,12 @@ export default function Dashboard() {
                              }
                            }}
                            placeholder={t('project.sectionName')}
-                           className="flex-1 bg-transparent border-none focus:outline-none text-txt"
+                           className="flex-1 bg-transparent border-none focus:outline-none text-txt text-sm sm:text-base"
                            autoFocus
                          />
                          <button
                            onClick={handleAddSection}
-                           className="px-3 py-1.5 bg-primary text-white rounded-lg hover:bg-primary-hover transition-colors text-sm"
+                           className="px-2 sm:px-3 py-1.5 bg-primary text-white rounded-lg hover:bg-primary-hover transition-colors text-xs sm:text-sm whitespace-nowrap"
                          >
                            {t('common.add')}
                          </button>
@@ -496,7 +524,7 @@ export default function Dashboard() {
                              setShowAddSection(false);
                              setNewSectionName('');
                            }}
-                           className="px-3 py-1.5 text-txt-muted hover:text-txt transition-colors text-sm"
+                           className="px-2 sm:px-3 py-1.5 text-txt-muted hover:text-txt transition-colors text-xs sm:text-sm whitespace-nowrap"
                          >
                            {t('common.cancel')}
                          </button>
@@ -504,9 +532,9 @@ export default function Dashboard() {
                      ) : (
                        <button
                          onClick={() => setShowAddSection(true)}
-                         className="flex items-center gap-2 px-3 py-1.5 text-txt-muted hover:text-txt transition-colors text-sm rounded-md hover:bg-bg-secondary w-full"
+                         className="flex items-center gap-2 px-3 py-1.5 text-txt-muted hover:text-txt transition-colors text-xs sm:text-sm rounded-md hover:bg-bg-secondary w-full"
                        >
-                         <PlusIcon className="w-5 h-5" />
+                         <PlusIcon className="w-4 h-4 sm:w-5 sm:h-5" />
                          <span>{t('project.addSection')}</span>
                        </button>
                      )}
@@ -515,14 +543,14 @@ export default function Dashboard() {
               ) : (
                 <div className="space-y-1 mb-6">
                   {displayedTasks.length === 0 && !showQuickInput ? (
-                    <div className="text-center py-12 text-txt-muted">
-                      <p className="text-sm">
+                    <div className="text-center py-8 sm:py-12 text-txt-muted">
+                      <p className="text-sm sm:text-base">
                         {showCompleted 
                           ? t('task.noTasks')
                           : t('task.noTasks')
                         }
                       </p>
-                      <p className="text-xs mt-1">
+                      <p className="text-xs sm:text-sm mt-1">
                         {!showCompleted && (selectedProjectId 
                           ? t('task.addTaskToStart')
                           : t('task.addTaskToStart')
@@ -534,7 +562,7 @@ export default function Dashboard() {
                       {completedCount > 0 && (
                         <button
                           onClick={() => setShowCompleted(!showCompleted)}
-                          className="flex items-center gap-2 px-3 py-2 mb-4 text-txt-muted hover:text-txt transition-colors text-sm"
+                          className="flex items-center gap-2 px-3 py-2 mb-4 text-txt-muted hover:text-txt transition-colors text-xs sm:text-sm"
                         >
                           {showCompleted ? (
                             <>
@@ -591,10 +619,10 @@ export default function Dashboard() {
                   {!showQuickInput && (
                     <button
                       onClick={() => setShowQuickInput(true)}
-                      className="flex items-center gap-3 px-3 py-2 rounded-lg border border-silver/30 bg-bg hover:border-primary/30 transition-colors focus-within:border-primary/50 focus-within:ring-2 focus-within:ring-primary/10 w-full"
+                      className="flex items-center gap-2 sm:gap-3 px-3 py-2 rounded-lg border border-silver/30 bg-bg hover:border-primary/30 transition-colors focus-within:border-primary/50 focus-within:ring-2 focus-within:ring-primary/10 w-full"
                     >
-                      <PlusIcon className="w-5 h-5 text-txt-muted flex-shrink-0" />
-                      <span className="text-sm text-txt-muted">{t('task.addTask')}...</span>
+                      <PlusIcon className="w-4 h-4 sm:w-5 sm:h-5 text-txt-muted flex-shrink-0" />
+                      <span className="text-xs sm:text-sm text-txt-muted">{t('task.addTask')}...</span>
                     </button>
                   )}
                 </div>

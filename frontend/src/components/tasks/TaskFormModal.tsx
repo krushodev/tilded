@@ -162,18 +162,19 @@ export const TaskFormModal = ({ isOpen, onClose, onSubmit, initialProjectId, tas
       placement="center"
       scrollBehavior="inside"
       classNames={{
-        base: 'bg-bg-dark',
+        base: 'bg-bg-dark max-w-full mx-4',
         backdrop: 'bg-black/50',
-        wrapper: 'z-[100]',
-        body: 'text-txt-light',
-        header: 'text-txt-light border-b border-silver/10'
+        wrapper: 'z-[100] p-0 sm:p-4',
+        body: 'text-txt-light px-4 sm:px-6',
+        header: 'text-txt-light border-b border-silver/10 px-4 sm:px-6',
+        footer: 'px-4 sm:px-6'
       }}
     >
-      <ModalContent className="bg-bg-dark">
+      <ModalContent className="bg-bg-dark max-h-[90vh] sm:max-h-[85vh]">
         {onClose => (
           <>
-            <ModalHeader className="text-txt-light border-b border-silver/10">{task ? t('task.editTask') : t('task.newTask')}</ModalHeader>
-            <ModalBody className="pb-6 text-txt-light" style={{ overflow: 'visible' }}>
+            <ModalHeader className="text-txt-light border-b border-silver/10 py-4 sm:py-3">{task ? t('task.editTask') : t('task.newTask')}</ModalHeader>
+            <ModalBody className="pb-6 text-txt-light py-4 sm:py-6" style={{ overflow: 'visible', maxHeight: 'calc(90vh - 120px)' }}>
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div>
                   <input
@@ -181,7 +182,7 @@ export const TaskFormModal = ({ isOpen, onClose, onSubmit, initialProjectId, tas
                     value={title}
                     onChange={e => setTitle(e.target.value)}
                     placeholder={t('task.taskName')}
-                    className="w-full px-3 py-2 rounded-lg border border-silver/30 bg-bg-dark text-txt-light placeholder:text-txt-muted focus:outline-none focus:border-primary"
+                    className="w-full px-3 py-3 sm:py-2 rounded-lg border border-silver/30 bg-bg-dark text-txt-light text-base placeholder:text-txt-muted focus:outline-none focus:border-primary touch-manipulation"
                     autoFocus
                   />
                 </div>
@@ -190,7 +191,7 @@ export const TaskFormModal = ({ isOpen, onClose, onSubmit, initialProjectId, tas
                   value={description}
                   onChange={e => setDescription(e.target.value)}
                   placeholder={t('task.description')}
-                  className="w-full px-3 py-2 rounded-lg border border-silver/30 bg-bg-dark text-txt-light placeholder:text-txt-muted focus:outline-none focus:border-primary resize-none"
+                  className="w-full px-3 py-3 sm:py-2 rounded-lg border border-silver/30 bg-bg-dark text-txt-light text-base placeholder:text-txt-muted focus:outline-none focus:border-primary resize-none touch-manipulation"
                   rows={3}
                 />
 

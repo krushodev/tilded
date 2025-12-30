@@ -157,17 +157,17 @@ export const TaskDetailModal = ({ isOpen, onClose, task, onDelete }: TaskDetailM
       scrollBehavior="outside"
       hideCloseButton
       classNames={{
-        base: 'bg-bg-secondary',
+        base: 'bg-bg-secondary max-w-full mx-4',
         backdrop: 'bg-black/50',
-        wrapper: 'z-[50] overflow-y-auto',
+        wrapper: 'z-[50] overflow-y-auto p-0 sm:p-4',
         body: 'p-0'
       }}
     >
-      <ModalContent className="bg-bg-secondary my-8">
-        <ModalBody className="p-0">
+      <ModalContent className="bg-bg-secondary my-4 sm:my-8 max-h-[90vh] sm:max-h-[85vh]">
+        <ModalBody className="p-0 overflow-y-auto max-h-[90vh] sm:max-h-[85vh]">
           <div className="flex flex-col md:flex-row">
             {/* Main content - Left side */}
-            <div className="flex-1 p-6 md:p-8 bg-bg-dark">
+            <div className="flex-1 p-4 sm:p-6 md:p-8 bg-bg-dark">
               {/* Task checkbox and title */}
               <div className="flex items-start gap-3 mb-4">
                 <button
@@ -189,7 +189,7 @@ export const TaskDetailModal = ({ isOpen, onClose, task, onDelete }: TaskDetailM
                     value={title}
                     onChange={e => setTitle(e.target.value)}
                     onBlur={handleTitleBlur}
-                    className={`w-full text-xl md:text-2xl font-semibold bg-transparent border-none focus:outline-none text-txt-light ${task.isCompleted ? 'line-through text-txt-muted' : ''}`}
+                    className={`w-full text-lg sm:text-xl md:text-2xl font-semibold bg-transparent border-none focus:outline-none text-txt-light touch-manipulation ${task.isCompleted ? 'line-through text-txt-muted' : ''}`}
                     placeholder={t('task.taskName')}
                   />
                 </div>
@@ -202,7 +202,7 @@ export const TaskDetailModal = ({ isOpen, onClose, task, onDelete }: TaskDetailM
                   onChange={e => setDescription(e.target.value)}
                   onBlur={handleDescriptionBlur}
                   placeholder={t('task.description')}
-                  className="w-full min-h-[80px] px-0 py-2 bg-transparent border-none focus:outline-none text-txt-light placeholder:text-txt-muted resize-none text-sm"
+                  className="w-full min-h-[80px] px-0 py-2 bg-transparent border-none focus:outline-none text-txt-light placeholder:text-txt-muted resize-none text-base sm:text-sm touch-manipulation"
                 />
               </div>
             </div>
